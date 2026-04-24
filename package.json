@@ -1,0 +1,37 @@
+{
+  "name": "harman-handloom",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:cf": "npx @cloudflare/next-on-pages",
+    "start": "next start",
+    "db:migrate": "wrangler d1 execute harman-db --file=./drizzle/0000_init.sql",
+    "db:seed": "wrangler d1 execute harman-db --file=./drizzle/seed.sql",
+    "db:migrate:local": "wrangler d1 execute harman-db --local --file=./drizzle/0000_init.sql",
+    "db:seed:local": "wrangler d1 execute harman-db --local --file=./drizzle/seed.sql"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "next": "16.2.4",
+    "next-cloudinary": "^6.17.5",
+    "razorpay": "^2.9.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
+    "@cloudflare/workers-types": "^4.20260421.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "drizzle-kit": "^0.31.10",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.84.0"
+  }
+}
