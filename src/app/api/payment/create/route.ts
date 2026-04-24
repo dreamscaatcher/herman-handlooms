@@ -1,25 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import Razorpay from "razorpay";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
-  const { amount } = await req.json() as { amount: number };
+  const body: { amount: number } = await req.json();
+  const { amount } = body;
 
   if (!amount || amount < 100) {
     return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
   }
 
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  const keyId = process.env.RAZORPAY_KEY_ID!;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET!;
+  const credentials = btoa(`${keyId}:${keySecret}`);
+
+  const response = await fetch("https://api.razorpay.com/v1/orders", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: `rcpt_${Date.now()}`,
+    }),
   });
 
-  const order = await razorpay.orders.create({
-    amount: Math.round(amount * 100), // paise
-    currency: "INR",
-    receipt: `rcpt_${Date.now()}`,
-  });
+  if (!response.ok) {
+    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+  }
 
+  const order: { id: string; amount: number } = await response.json();
   return NextResponse.json({ orderId: order.id, amount: order.amount });
 }

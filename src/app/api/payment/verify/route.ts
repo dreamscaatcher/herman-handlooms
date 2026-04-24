@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPayment } from "@/lib/razorpay";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 interface VerifyBody {
   razorpayOrderId: string;
@@ -20,10 +20,10 @@ interface VerifyBody {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json() as VerifyBody;
-  const { razorpayOrderId, razorpayPaymentId, razorpaySignature, order } = body;
+  const body: VerifyBody = await req.json();
+  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = body;
 
-  const valid = verifyPayment(
+  const valid = await verifyPayment(
     razorpayOrderId,
     razorpayPaymentId,
     razorpaySignature,
@@ -34,9 +34,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
   }
 
-  // In prod, persist to D1 via Cloudflare binding.
-  // For now, return a synthetic order ID so checkout flow works.
   const orderId = `ORD-${Date.now()}`;
-
   return NextResponse.json({ orderId });
 }
